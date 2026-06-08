@@ -326,7 +326,7 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
       <table>
         <thead>
           <tr>
-            <th>Fecha</th>
+            <th>Pago</th>
             <th>Cuota</th>
             <th>Capital</th>
             <th>Interés</th>
@@ -892,8 +892,8 @@ function generarPDF() {
   y+=4;
   doc.autoTable({
     startY:y,
-    head:[['Fecha','Saldo Inicial','Cuota','Capital','Interés','Saldo Final']],
-    body: rows.map(r=>[r.date.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}),ascii(fmtPDF(r.si)),ascii(fmtPDF(r.pago)),ascii(fmtPDF(r.prin)),ascii(fmtPDF(r.int)),ascii(fmtPDF(r.sp))]),
+    head:[['Pago','Saldo Inicial','Cuota','Capital','Interés','Saldo Final']],
+    body: rows.map(r=>['Pago '+r.n,ascii(fmtPDF(r.si)),ascii(fmtPDF(r.pago)),ascii(fmtPDF(r.prin)),ascii(fmtPDF(r.int)),ascii(fmtPDF(r.sp))]),
     foot:[['Totales', '', ascii(fmtPDF(totalPag)), ascii(fmtPDF(totalPrin)), ascii(fmtPDF(totalInt)), '']],
     theme:'grid',
     headStyles:{fillColor:[49,45,117],textColor:[210,220,255],fontSize:9,fontStyle:'bold',halign:'center',valign:'middle',lineColor:[50,70,130],lineWidth:0.2},
