@@ -1,0 +1,168 @@
+// ============================================================
+//  BRAVO — 2º Crédito | Apps Script
+//  Extensiones → Apps Script → pegar → guardar → recargar hoja
+// ============================================================
+
+const SIMULADOR_2DO_URL = 'https://pabloguerrero-design.github.io/bravo-simuladores/2docredito.html';
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('🔵 Bravo')
+    .addItem('📄 Generar 2º Crédito', 'generar2doCredito')
+    .addItem('🔍 Debug — ver datos leídos', 'debug2doCredito')
+    .addToUi();
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function safe2(fn) {
+  try {
+    const v = fn();
+    if (v === null || v === undefined) return null;
+    const s = String(v).trim();
+    return (s === '' || s.startsWith('#')) ? null : v;
+  } catch(e) { return null; }
+}
+
+function num2(v) {
+  if (v === null || v === undefined) return 0;
+  const n = Number(v);
+  return isNaN(n) ? 0 : n;
+}
+
+function fdate2(v) {
+  if (!v) return '';
+  try {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return '';
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  } catch(e) { return ''; }
+}
+
+// ── Leer datos ───────────────────────────────────────────────
+function leerDatos2do() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const dc = ss.getSheetByName('Datos crédito');
+  const ta = ss.getSheetByName('TA');
+  const ct = ss.getSheetByName('Contratos');
+
+  if (!dc) throw new Error('No se encontró "Datos crédito"');
+  if (!ta) throw new Error('No se encontró "TA"');
+  if (!ct) throw new Error('No se encontró "Contratos"');
+
+  // ── NOMBRE — Rellenar info cliente D5 ──────────────────────
+  const ricSheet = ss.getSheetByName('Rellenar info cliente');
+  let nombre = '';
+  if (ricSheet) {
+    const v = safe2(() => ricSheet.getRange('D5').getValue());
+    if (v && String(v).trim().length > 1) nombre = String(v).trim();
+  }
+  if (!nombre) {
+    const v2 = safe2(() => ta.getRange('D2').getValue());
+    if (v2 && String(v2).trim().length > 4 && String(v2).includes(' ')) nombre = String(v2).trim();
+  }
+  if (!nombre) {
+    const v3 = safe2(() => ct.getRange('C3').getValue());
+    if (v3 && String(v3).trim().length > 4 && String(v3).includes(' ')) nombre = String(v3).trim();
+  }
+  // Si no hay info dejar vacío
+
+  // ── REFERENCIA ──────────────────────────────────────────────
+  const ref = String(safe2(() => ct.getRange('C4').getValue()) || '').trim();
+
+  // ── TIN ─────────────────────────────────────────────────────
+  let tin = 19;
+  const tinRaw = safe2(() => ta.getRange('D4').getValue());
+  if (tinRaw !== null) {
+    const t = Number(tinRaw);
+    if (t > 0) tin = t > 1 ? +(t).toFixed(2) : +(t * 100).toFixed(2);
+  }
+
+  // ── CUOTA ───────────────────────────────────────────────────
+  const cuota = num2(safe2(() => ta.getRange('E13').getValue()));
+
+  // ── SALDO (Cantidad a prestar = sin CB, Contratos C7) ───────
+  // C7 = saldo nuevo sin revolving = cantidad prestada
+  // C9 = saldo inicial total (con revolving)
+  const prestamo = num2(safe2(() => ct.getRange('C7').getValue()));
+
+  // ── FECHAS ──────────────────────────────────────────────────
+  const apertura   = fdate2(safe2(() => dc.getRange('B21').getValue()));
+  const primerPago = fdate2(safe2(() => dc.getRange('B22').getValue()));
+
+  // ── REVOLVING ───────────────────────────────────────────────
+  let revolving = false, cnAnt = '', saldoAnt = 0;
+  const rvRaw = String(safe2(() => ct.getRange('P9').getValue()) || '').toLowerCase().trim();
+  revolving = rvRaw === 'sí' || rvRaw === 'si' || rvRaw === 'yes' || rvRaw === '1';
+  if (revolving) {
+    cnAnt    = String(safe2(() => ct.getRange('C23').getValue()) || '').trim();
+    saldoAnt = num2(safe2(() => ct.getRange('C8').getValue()));
+  }
+
+  return { nombre, ref, tin, cuota, prestamo, apertura, primerPago,
+           revolving, cnAnt, saldoAnt };
+}
+
+// ── Generar 2º Crédito ───────────────────────────────────────
+function generar2doCredito() {
+  let d;
+  try { d = leerDatos2do(); }
+  catch(e) {
+    SpreadsheetApp.getUi().alert('❌ Error leyendo datos:\n\n' + e.message);
+    return;
+  }
+
+  const params = {
+    nombre:      d.nombre,
+    ref:         d.ref,
+    tin:         d.tin,
+    apertura:    d.apertura,
+    pago:        d.primerPago,
+    cuota:       d.cuota.toFixed(2),
+    prestamo:    d.prestamo.toFixed(2),
+    revolving:   d.revolving ? '1' : '0',
+    cnAnt:       d.cnAnt,
+    saldoAnt:    d.saldoAnt.toFixed(2),
+    autogenerar: '1'
+  };
+
+  const qs = Object.entries(params)
+    .map(([k,v]) => encodeURIComponent(k)+'='+encodeURIComponent(v))
+    .join('&');
+  const url = SIMULADOR_2DO_URL + '?' + qs;
+  const esc = url.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+  const html = HtmlService.createHtmlOutput(
+    `<script>window.open('${esc}','_blank');google.script.host.close();<\/script>`
+  ).setWidth(1).setHeight(1);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Abriendo 2º Crédito...');
+}
+
+// ── Debug ─────────────────────────────────────────────────────
+function debug2doCredito() {
+  let d;
+  try { d = leerDatos2do(); }
+  catch(e) { SpreadsheetApp.getUi().alert('❌ Error:\n\n' + e.message); return; }
+
+  const ok = v => (v && String(v).length > 0 && v != 0) ? '✓' : '⚠️';
+  const msg = [
+    '─── CLIENTE ─────────────────────',
+    `${ok(d.nombre)}  Nombre:   ${d.nombre}`,
+    `${ok(d.ref)}  Ref:      ${d.ref}`,
+    '',
+    '─── CRÉDITO ─────────────────────',
+    `${ok(d.tin)}  TIN:      ${d.tin}%`,
+    `${ok(d.cuota)}  Cuota:    ${d.cuota.toFixed(2)} €`,
+    `${ok(d.prestamo)}  Prestamo: ${d.prestamo.toFixed(2)} €`,
+    `${ok(d.apertura)}  Apertura: ${d.apertura}`,
+    `${ok(d.primerPago)}  1er pago: ${d.primerPago}`,
+    '',
+    '─── REVOLVING ───────────────────',
+    d.revolving
+      ? `✓  SÍ → CN anterior: ${d.cnAnt} / Saldo: ${d.saldoAnt.toFixed(2)} €`
+      : '✓  NO',
+  ].join('\n');
+
+  SpreadsheetApp.getUi().alert('📊 DATOS 2º CRÉDITO\n\n' + msg);
+}
