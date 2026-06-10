@@ -745,8 +745,8 @@ function generarPDF() {
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-  const fmtPDF = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' EUR';
-  const fmt = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
+  const fmtPDF = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true});
+  const fmt_eur = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
   const W=210, M=14;
 
   const today = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
@@ -797,8 +797,8 @@ function generarPDF() {
   /* ── KPI BOXES ── */
   let y=HDR+10;
   const kpis=[
-    {label:'Saldo Inicial',   value:fmt(ns),        color:C.green, bg:[215,255,238]},
-    {label:'Cuota mensual',   value:fmt(cuota),     color:C.blue,  bg:[215,230,255]},
+    {label:'Saldo Inicial',   value:fmt_eur(ns),     color:C.green, bg:[215,255,238]},
+    {label:'Cuota mensual',   value:fmt_eur(cuota),  color:C.blue,  bg:[215,230,255]},
     {label:'Plazo', value:plazo+' meses', color:[100,115,155], bg:[230,233,248]}
   ];
   const kW=(W-M*2-6)/3;
@@ -888,13 +888,13 @@ function generarPDF() {
   doc.addPage();
   y=14;
   doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...C.blue);
-  doc.text('TABLA DE AMORTIZACIÓN (EUR)',M,y);
+  doc.text('TABLA DE AMORTIZACION (€)',M,y);
   y+=4;
   doc.autoTable({
     startY:y,
     head:[['Nº','Saldo Inicial','Cuota','Capital','Interés','Saldo Final']],
     body: rows.map(r=>[r.n,ascii(fmtPDF(r.si)),ascii(fmtPDF(r.pago)),ascii(fmtPDF(r.prin)),ascii(fmtPDF(r.int)),ascii(fmtPDF(r.sp))]),
-    foot:[['Totales', '', ascii(fmtPDF(totalPag)), ascii(fmtPDF(totalPrin)), ascii(fmtPDF(totalInt)), '']],
+    foot:[['Totales', '', fmt_eur(totalPag), fmt_eur(totalPrin), fmt_eur(totalInt), '']],
     theme:'grid',
     headStyles:{fillColor:[49,45,117],textColor:[210,220,255],fontSize:9,fontStyle:'bold',halign:'center',valign:'middle',lineColor:[50,70,130],lineWidth:0.2},
     footStyles:{fillColor:[49,45,117],textColor:[210,225,255],fontSize:9,fontStyle:'bold',halign:'center',valign:'middle'},
