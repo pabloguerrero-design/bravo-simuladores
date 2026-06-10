@@ -1219,7 +1219,7 @@ function generarPDF() {
     startY:y,
     head:[['Nº','Saldo Inicial','Cuota','Capital','Interés','Saldo Final']],
     body: rows.map(r=>[r.n,ascii(fmtPDF(r.si)),ascii(fmtPDF(r.pago)),ascii(fmtPDF(r.prin)),ascii(fmtPDF(r.int)),ascii(fmtPDF(r.sp))]),
-    foot:[['Totales', '', ascii(fmt(totalPag)), ascii(fmt(totalPrin)), ascii(fmt(totalInt)), '')],
+    foot:[['Totales', '', fmt_eur(totalPag), fmt_eur(totalPrin), fmt_eur(totalInt), '']],
     theme:'grid',
     headStyles:{
       fillColor:[49,45,117],textColor:[210,220,255],
