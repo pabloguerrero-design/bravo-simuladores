@@ -1030,7 +1030,7 @@ function generarPDF() {
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-  const fmtPDF = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true});
+  const fmtPDF = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
   const fmt = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
   const W=210, M=14;
 
@@ -1213,7 +1213,7 @@ function generarPDF() {
   y = 14;
   doc.setFontSize(9); doc.setFont('helvetica','bold');
   doc.setTextColor(...C.blue);
-  doc.text('TABLA DE AMORTIZACIÓN (EUR)',M,y);
+  doc.text('TABLA DE AMORT. (€)',M,y);
   y+=4;
   doc.autoTable({
     startY:y,
