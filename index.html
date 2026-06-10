@@ -683,8 +683,8 @@ function run() {
   E('k-cuota').textContent  = fmt(cuota);
   E('k-int').textContent    = fmt(totalInt);
   const tae = (Math.pow(1 + tin/1200, 12) - 1)*100;
-  E('k-tin').textContent    = tin.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
-  E('k-tae').textContent    = tae.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+  E('k-tin').textContent    = tin.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%';
+  E('k-tae').textContent    = tae.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%';
   E('k-int-sub').textContent= ((totalInt/ns)*100).toFixed(1)+'% del nuevo saldo';
   E('k-nsaldo').textContent = fmt(saldo);
 
@@ -798,7 +798,7 @@ function buildCharts(rows) {
             },
             label: ctx => {
               const v = ctx.raw;
-              return '  Saldo: ' + v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' \u20ac';
+              return '  Saldo: ' + v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}) + ' \u20ac';
             },
             afterLabel: ctx => {
               const idx = ctx.dataIndex - 1; // offset for starting saldo point
@@ -883,7 +883,7 @@ function calcRevolvingTotal() {
   const debts = getDebts();
   const totalDeudas = debts.reduce((s,d) => s+d.liq, 0);
   const total = totalDeudas + saldoAnt;
-  const f = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const f = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
 
   E('rv-deudas').textContent = f(totalDeudas);
   E('rv-ant').textContent = f(saldoAnt);
@@ -955,7 +955,7 @@ function calcDesglose() {
   const brok = +(base * 0.05 * 1.21).toFixed(2);
   const total = +(base + brok).toFixed(2);
 
-  const f = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const f = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
 
   if (E('dsg-pab'))    E('dsg-pab').textContent    = f(totalLiq);
   if (E('dsg-ce'))     E('dsg-ce').textContent     = f(totalCE);
@@ -996,7 +996,7 @@ function calcDebtSummary() {
     const ceSpan = tr.querySelector('.ce-val');
     if (ceSpan) {
       const ce = calcComisionExito(dr, liq);
-      ceSpan.textContent = ce > 0 ? ce.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' : '—';
+      ceSpan.textContent = ce > 0 ? ce.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €' : '—';
     }
   });
 
@@ -1004,7 +1004,7 @@ function calcDebtSummary() {
   const totalLiq = debts.reduce((s,d) => s+d.liq, 0);
   const totalCE  = debts.reduce((s,d) => s + calcComisionExito(d.dr, d.liq), 0);
   const pct      = totalDR > 0 ? ((totalDR-totalLiq)/totalDR*100).toFixed(1)+'%' : '—';
-  const f = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const f = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
 
   const ahorroTotal = totalDR - totalLiq;
   E('ds-dr').textContent          = totalDR    > 0 ? f(totalDR)    : '—';
@@ -1031,7 +1031,7 @@ function generarPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const fmtPDF = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true});
-  const fmt = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const fmt = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
   const W=210, M=14;
 
   const today = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
@@ -1120,7 +1120,7 @@ function generarPDF() {
     ['N\u00b0 de credito',               nCred||'-'],
     ['Fecha de apertura',                 fmtDateES(apertura)],
     ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
-    ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'%'],
+    ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
     ...(dsgPab > 0    ? [['Pago a Banco',                    fmtPDF(dsgPab)]]    : []),
     ...(dsgCE > 0     ? [['Com. Exito (20%) + IVA',          fmtPDF(dsgCE)]]     : []),
     ...(dsgMen > 0    ? [['Comisiones mensuales + IVA',      fmtPDF(dsgMen)]]    : []),
