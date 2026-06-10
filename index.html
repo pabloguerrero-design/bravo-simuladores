@@ -1311,7 +1311,6 @@ function generarPDF() {
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
     if (btnPdf) { btnPdf.textContent = '⬇ Descargar PDF cliente'; btnPdf.disabled = false; }
   });
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
   } catch(err) {
     console.error('PDF error:', err);
     alert('Error al generar el PDF: ' + err.message);
