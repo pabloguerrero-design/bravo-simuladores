@@ -543,7 +543,7 @@ const ascii = s => s
   .replace(/[óòôö]/g,'o').replace(/[úùûü]/g,'u').replace(/ñ/g,'n')
   .replace(/[ÁÀÂÄ]/g,'A').replace(/[ÉÈÊË]/g,'E').replace(/[ÍÌÎÏ]/g,'I')
   .replace(/[ÓÒÔÖ]/g,'O').replace(/[ÚÙÛÜ]/g,'U').replace(/Ñ/g,'N')
-  .replace(/\u20ac/g,'EUR').replace(/\u2212/g,'-');
+  .replace(/\u2212/g,'-');
 
 let chs   = {};
 let state = null;
@@ -1102,7 +1102,7 @@ function generarPDF() {
     /* value */
     doc.setFontSize(12.5); doc.setFont('helvetica','bold');
     doc.setTextColor(...k.color);
-    doc.text(ascii(k.value),kx+kW/2,y+24,{align:'center'});
+    doc.text(k.value,kx+kW/2,y+24,{align:'center'});
   });
   /* ── CONDICIONES ── */
   y+=38;
