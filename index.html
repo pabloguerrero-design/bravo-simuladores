@@ -1265,7 +1265,7 @@ function generarPDF() {
   // Filename: CN12345_20260608_PropuestaCredito
   const cleanStr = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]/g,'');
   const hoy = new Date();
-  const fechaFile = String(hoy.getDate()).padStart(2,'0')+String(hoy.getMonth()+1).padStart(2,'0')+String(hoy.getFullYear());
+  const fechaFile = String(hoy.getDate()).padStart(2,'0')+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getFullYear());
   const cnFile = cleanStr((E('v-ncred')&&E('v-ncred').value)||'SN');
   const nombreParts = (nombreCliente||'').trim().split(/\s+/);
   const nombreShort = cleanStr(nombreParts[0]||'');
