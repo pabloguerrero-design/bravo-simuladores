@@ -1267,7 +1267,10 @@ function generarPDF() {
   const hoy = new Date();
   const fechaFile = String(hoy.getDate()).padStart(2,'0')+String(hoy.getMonth()+1).padStart(2,'0')+String(hoy.getFullYear());
   const cnFile = cleanStr((E('v-ncred')&&E('v-ncred').value)||'SN');
-  const filename = cnFile+'_'+fechaFile+'_PropuestaCredito.pdf';
+  const nombreParts = (nombreCliente||'').trim().split(/\s+/);
+  const nombreShort = cleanStr(nombreParts[0]||'');
+  const apellidoShort = cleanStr(nombreParts[1]||'');
+  const filename = cnFile+'_'+fechaFile+'_'+nombreShort+(apellidoShort?'_'+apellidoShort:'')+'.pdf';
   // ── Guardar en Drive (y descarga local como fallback) ──
   const pdfBase64 = doc.output('datauristring').split(',')[1];
   const btnPdf = E('btn-pdf');
