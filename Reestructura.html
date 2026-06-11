@@ -710,10 +710,10 @@ function generarPDF() {
 
   /* ── HEADER ── */
   const HDR = 56;
-  doc.setFillColor(...C.bg);
+  doc.setFillColor(49,45,117);
   doc.rect(0,0,W,HDR,'F');
   /* accent line */
-  doc.setFillColor(...C.blue);
+  doc.setFillColor(100,90,200);
   doc.rect(0,HDR-2,W,2,'F');
 
   /* Logo: left-aligned, vertically centered */
@@ -725,18 +725,16 @@ function generarPDF() {
   doc.setFontSize(16); doc.setFont('helvetica','bold');
   doc.setTextColor(...C.t1);
   doc.text(ascii('Propuesta de Reestructura'),cx,16,{align:'center'});
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.setTextColor(170,185,220);
   doc.setFontSize(11); doc.setFont('helvetica','bold');
-  doc.setTextColor(...C.t1);
+  doc.setTextColor(255,255,255);
   doc.text(ascii('Cliente: '+nombreCliente),cx,28,{align:'center'});
-  doc.setFontSize(7.5); doc.setFont('helvetica','italic');
-  doc.setTextColor(170,185,220);
+  doc.setFontSize(7.5); doc.setFont('helvetica','bolditalic');
+  doc.setTextColor(255,255,255);
   doc.text('Propuesta informativa. Las condiciones del credito pueden cambiar.',cx,36,{align:'center'});
 
   /* Date / Ref top-right */
-  doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.setTextColor(170,185,220);
+  doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.setTextColor(255,255,255);
   doc.text(ascii('Fecha: '+today),W-M,12,{align:'right'});
   doc.text('Ref.: '+ref,W-M,20,{align:'right'});
   if(nCred) doc.text('N\u00b0 Credito: '+nCred,W-M,28,{align:'right'});
