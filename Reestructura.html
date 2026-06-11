@@ -772,7 +772,6 @@ function generarPDF() {
     ['Fecha de apertura',                 fmtDateES(apertura)],
     ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
     ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
-    ['Saldo Actual',                      fmtPDF(saldo)],
     ...(state.ant > 0 ? [['Cuota anterior', fmtPDF(state.ant)]] : []),
     ['Nueva cuota negociada',             fmtPDF(cuota)],
     ['Nuevo saldo inicial',               fmtPDF(ns)],
