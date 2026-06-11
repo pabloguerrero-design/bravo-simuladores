@@ -949,16 +949,43 @@ function generarPDF() {
   const nom2 = cleanStr(partes2[0]||'');
   const ape2 = cleanStr(partes2[1]||'');
   const filename = cnFile2+'_'+fechaFile+'_'+nom2+(ape2?'_'+ape2:'')+'_2doCredito.pdf';
-  // Mobile-compatible: open in new tab instead of direct download
-  const blob = doc.output('blob');
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = filename;
-  a.target   = '_blank';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+  // Guardar en Drive y descarga local como fallback
+  const pdfBase64 = doc.output('datauristring').split(',')[1];
+  const btnPdf = E('btn-pdf');
+  if (btnPdf) { btnPdf.textContent = '⏳ Guardando...'; btnPdf.disabled = true; }
+
+  fetch(WEBAPP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ pdfBase64, filename, folderId: DRIVE_FOLDER })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      if (btnPdf) { btnPdf.textContent = '✅ Guardado en Drive'; btnPdf.disabled = false; }
+      const blob2 = new Blob([Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))], {type:'application/pdf'});
+      const url2  = URL.createObjectURL(blob2);
+      const a2    = document.createElement('a');
+      a2.href = url2; a2.download = filename;
+      document.body.appendChild(a2); a2.click();
+      setTimeout(() => { document.body.removeChild(a2); URL.revokeObjectURL(url2); }, 500);
+      const av = document.createElement('div');
+      av.style.cssText = 'position:fixed;top:20px;right:20px;background:#1DC98A;color:#040F0A;padding:14px 22px;border-radius:12px;font-weight:700;z-index:9999;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+      av.textContent = '✅ PDF guardado en Drive y descargado';
+      document.body.appendChild(av);
+      setTimeout(() => av.remove(), 5000);
+    } else { throw new Error(data.error || 'Error'); }
+  })
+  .catch(err => {
+    console.warn('Drive save failed, descarga local:', err.message);
+    const blob = new Blob([Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))], {type:'application/pdf'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = filename; a.target = '_blank';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    if (btnPdf) { btnPdf.textContent = '⬇ Descargar PDF cliente'; btnPdf.disabled = false; }
+  });
   } catch(err) {
     console.error('PDF error:', err);
     alert('Error al generar el PDF: ' + err.message);
