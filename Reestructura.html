@@ -359,7 +359,7 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
 ═══════════════════════════════════════════ */
 const E   = id => document.getElementById(id);
 const WEBAPP_URL   = 'https://script.google.com/macros/s/AKfycbzqd1R6y9bAQnhl54i0X1hO1MeFtU_C9xJPZIp9FqEFc5GDGDzZpLlBckYiuxAsMPvYKw/exec';
-const DRIVE_FOLDER = '1sEq1xPazSQOrkH4WOg1syd1IyZsQBGcI';
+const DRIVE_FOLDER = '1wUbzPeRR4SwcYWxcTmpHImoamMys5Fl5';
 const fmt = n  => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' \u20ac';
 const fmtK = n => {
   if(n>=10000) return (n/1000).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})+'k\u20ac';
@@ -854,19 +854,46 @@ function generarPDF() {
   const nombreFile = partes[0]||'';
   const apellidoFile = partes[1]||'';
   const hoy = new Date();
-  const fechaFile = hoy.getFullYear()+String(hoy.getMonth()+1).padStart(2,'0')+String(hoy.getDate()).padStart(2,'0');
+  const fechaFile = String(hoy.getDate()).padStart(2,'0')+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getFullYear());
   const cleanStr = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]/g,'');
-  const filename = 'Reestructura_Bravo_'+cleanStr(nombreFile)+'_'+cleanStr(apellidoFile)+'_'+fechaFile+'.pdf';
-  // Mobile-compatible: open in new tab instead of direct download
-  const blob = doc.output('blob');
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = filename;
-  a.target   = '_blank';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+  const cnFile = cleanStr((E('v-ncred')&&E('v-ncred').value)||'SN');
+  const filename = cnFile+'_'+fechaFile+'_'+cleanStr(nombreFile)+(cleanStr(apellidoFile)?'_'+cleanStr(apellidoFile):'')+"_Reestructura.pdf";
+  const pdfBase64 = doc.output('datauristring').split(',')[1];
+  const btnPdf = E('btn-pdf');
+  if (btnPdf) { btnPdf.textContent = '⏳ Guardando...'; btnPdf.disabled = true; }
+
+  fetch(WEBAPP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ pdfBase64, filename, folderId: DRIVE_FOLDER })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      if (btnPdf) { btnPdf.textContent = '✅ Guardado en Drive'; btnPdf.disabled = false; }
+      const blob2 = new Blob([Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))], {type:'application/pdf'});
+      const url2  = URL.createObjectURL(blob2);
+      const a2    = document.createElement('a');
+      a2.href = url2; a2.download = filename;
+      document.body.appendChild(a2); a2.click();
+      setTimeout(() => { document.body.removeChild(a2); URL.revokeObjectURL(url2); }, 500);
+      const av = document.createElement('div');
+      av.style.cssText = 'position:fixed;top:20px;right:20px;background:#1DC98A;color:#040F0A;padding:14px 22px;border-radius:12px;font-weight:700;z-index:9999;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+      av.textContent = '✅ PDF guardado en Drive y descargado';
+      document.body.appendChild(av);
+      setTimeout(() => av.remove(), 5000);
+    } else { throw new Error(data.error || 'Error'); }
+  })
+  .catch(err => {
+    console.warn('Drive save failed, descarga local:', err.message);
+    const blob = new Blob([Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))], {type:'application/pdf'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = filename; a.target = '_blank';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    if (btnPdf) { btnPdf.textContent = '⬇ Descargar PDF cliente'; btnPdf.disabled = false; }
+  });
   } catch(err) {
     console.error('PDF error:', err);
     alert('Error al generar el PDF: ' + err.message);
