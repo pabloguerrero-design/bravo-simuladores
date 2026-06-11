@@ -450,19 +450,20 @@ function buildTable(saldo, cuota, tin, apertura, primerPago) {
    BROKERAGE + REVOLVING CALC
 ═══════════════════════════════════════════ */
 function calcSaldoFinal(update=true) {
-  const montoNeto  = parseFloat(E('v-prestamo').value) || 0;  // B9 - sin brokerage
-  const prestamoConCB = parseFloat(E('v-prestamo-cb') ? E('v-prestamo-cb').value : 0) || montoNeto;  // B12 - con brokerage
-  const saldoAnt  = E('v-revolving').checked ? (parseFloat(E('v-saldo-ant').value) || 0) : 0;
-  const saldoReal = +(prestamoConCB + saldoAnt).toFixed(2);  // B12 + B13(revolving)
-  const prestamo  = montoNeto;
-  const total     = saldoReal;
+  const montoNeto     = parseFloat(E('v-prestamo').value) || 0;  // B9 - escrito por usuario
+  const brokerage     = +(montoNeto * 0.05 * 1.21).toFixed(2);   // 5% + IVA 21% calculado auto
+  const prestamoConCB = +(montoNeto + brokerage).toFixed(2);      // B12
+  const saldoAnt      = E('v-revolving').checked ? (parseFloat(E('v-saldo-ant').value) || 0) : 0;
+  const saldoReal     = +(prestamoConCB + saldoAnt).toFixed(2);   // saldo tabla
+  const total         = saldoReal;
+  // Guardar en hidden para PDF
+  if(E('v-prestamo-cb'))  E('v-prestamo-cb').value  = prestamoConCB;
+  if(E('v-comision-cb'))  E('v-comision-cb').value  = brokerage;
   if (update) {
     const banner = E('broker-banner');
-    if (prestamo > 0) {
-      const montoNetoVal  = parseFloat(E('v-prestamo').value) || 0;
-      const comisionCBVal = parseFloat(E('v-comision-cb') ? E('v-comision-cb').value : 0) || 0;
-      E('br-prestamo').textContent  = fmt(montoNetoVal);
-      if(E('br-comision')) E('br-comision').textContent = fmt(comisionCBVal) + ' = ';
+    if (montoNeto > 0) {
+      E('br-prestamo').textContent  = fmt(montoNeto);
+      if(E('br-comision')) E('br-comision').textContent = fmt(brokerage) + ' = ';
       E('br-revolving').textContent = fmt(saldoAnt);
       E('br-total').textContent     = fmt(total);
       const revTxt = E('br-revolving-txt');
@@ -587,10 +588,12 @@ function run() {
 
   buildCharts(rows);
 
-  const prestamo  = parseFloat(E('v-prestamo').value) || 0;
-  const saldoAnt  = E('v-revolving').checked ? (parseFloat(E('v-saldo-ant').value) || 0) : 0;
-  const cnAnt     = E('v-cn-ant') ? E('v-cn-ant').value.trim() : '';
-  state = { saldo, cuota, tin, ns, plazo, rows, totalInt, totalPag, totalPrin, apertura, primerPago, int0, prestamo, saldoAnt, cnAnt };
+  const montoNeto     = parseFloat(E('v-prestamo').value) || 0;
+  const brokerage     = +(montoNeto * 0.05 * 1.21).toFixed(2);
+  const prestamoConCB = +(montoNeto + brokerage).toFixed(2);
+  const saldoAnt      = E('v-revolving').checked ? (parseFloat(E('v-saldo-ant').value) || 0) : 0;
+  const cnAnt         = E('v-cn-ant') ? E('v-cn-ant').value.trim() : '';
+  state = { saldo, cuota, tin, ns, plazo, rows, totalInt, totalPag, totalPrin, apertura, primerPago, int0, montoNeto, brokerage, prestamoConCB, saldoAnt, cnAnt };
   E('btn-pdf').disabled = false;
 }
 
@@ -747,7 +750,7 @@ function generarPDF() {
     return;
   }
   try {
-  const { saldo, cuota, tin, ns, plazo, rows, totalInt, totalPag, totalPrin, apertura, primerPago, int0, prestamo, saldoAnt, cnAnt } = state;
+  const { saldo, cuota, tin, ns, plazo, rows, totalInt, totalPag, totalPrin, apertura, primerPago, int0, montoNeto, brokerage, prestamoConCB, saldoAnt, cnAnt } = state;
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
@@ -844,9 +847,10 @@ function generarPDF() {
     ['Fecha primer pago',                 fmtDateES(primerPago)],
     ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
     ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
-    ['Cantidad prestada',                 fmtPDF(state.prestamo)],
-
-
+    ['Cantidad a prestar (sin brokerage)', fmtPDF(state.montoNeto)],
+    ['Comisi\u00f3n brokerage (5% + IVA 21%)', fmtPDF(state.brokerage)],
+    ...(state.saldoAnt > 0 ? [['Cierre cr\u00e9dito anterior', fmtPDF(state.saldoAnt)]] : []),
+    ['Saldo Inicial total',               fmtPDF(state.saldo)],
   ];
   params.forEach(([label,value],idx)=>{
     const rowBg = idx%2===0 ? [235,240,255] : [245,247,255];
@@ -862,7 +866,7 @@ function generarPDF() {
   });
 
   /* ── REVOLVING EN PDF ── */
-  const { saldoAnt: sAnt, cnAnt: cnA, prestamo: prest } = state;
+  const { saldoAnt: sAnt, cnAnt: cnA, prestamoConCB: prest } = state;
   if (sAnt > 0) {
     y += 8;
     doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(45,55,90);
