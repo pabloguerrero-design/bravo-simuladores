@@ -691,8 +691,8 @@ function generarPDF() {
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-  const fmtPDF = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' EUR';
-  const fmt = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
+  const fmtPDF = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true});
+  const fmt_eur = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
   const W=210, M=14;
 
   const today = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
