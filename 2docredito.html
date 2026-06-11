@@ -935,10 +935,13 @@ function generarPDF() {
   const nombreFile = partes[0]||'';
   const apellidoFile = partes[1]||'';
   const hoy = new Date();
-  const fechaFile = hoy.getFullYear()+String(hoy.getMonth()+1).padStart(2,'0')+String(hoy.getDate()).padStart(2,'0');
+  const fechaFile = String(hoy.getDate()).padStart(2,'0')+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getFullYear());
   const cleanStr = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]/g,'');
   const cnFile2 = cleanStr((E('v-ncred')&&E('v-ncred').value)||'SN');
-  const filename = cnFile2+'_'+fechaFile+'_2doCredito.pdf';
+  const partes2 = (nombreCliente||'').trim().split(/\s+/);
+  const nom2 = cleanStr(partes2[0]||'');
+  const ape2 = cleanStr(partes2[1]||'');
+  const filename = cnFile2+'_'+fechaFile+'_'+nom2+(ape2?'_'+ape2:'')+'_2doCredito.pdf';
   // Mobile-compatible: open in new tab instead of direct download
   const blob = doc.output('blob');
   const url  = URL.createObjectURL(blob);
