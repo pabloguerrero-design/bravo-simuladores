@@ -225,6 +225,7 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
         <input type="number" id="v-prestamo" value="3000" min="0" step="0.01" oninput="calcSaldoFinal();run()"/>
         <input type="hidden" id="v-monto-neto" value="3000"/>
         <input type="hidden" id="v-comision-cb" value="0"/>
+        <input type="hidden" id="v-prestamo-cb" value="0"/>
       </div>
       <div class="ig">
         <label for="v-cuota">Cuota mensual (€)</label>
@@ -449,17 +450,19 @@ function buildTable(saldo, cuota, tin, apertura, primerPago) {
    BROKERAGE + REVOLVING CALC
 ═══════════════════════════════════════════ */
 function calcSaldoFinal(update=true) {
-  const prestamo  = parseFloat(E('v-prestamo').value) || 0;
+  const montoNeto  = parseFloat(E('v-prestamo').value) || 0;  // B9 - sin brokerage
+  const prestamoConCB = parseFloat(E('v-prestamo-cb') ? E('v-prestamo-cb').value : 0) || montoNeto;  // B12 - con brokerage
   const saldoAnt  = E('v-revolving').checked ? (parseFloat(E('v-saldo-ant').value) || 0) : 0;
-  const saldoReal = +(prestamo + saldoAnt).toFixed(2);
-  const total     = saldoReal;  // prestamo ya incluye CB
+  const saldoReal = +(prestamoConCB + saldoAnt).toFixed(2);  // B12 + B13(revolving)
+  const prestamo  = montoNeto;
+  const total     = saldoReal;
   if (update) {
     const banner = E('broker-banner');
     if (prestamo > 0) {
-      const montoNeto  = parseFloat(E('v-monto-neto') ? E('v-monto-neto').value : prestamo) || prestamo;
-      const comisionCB = parseFloat(E('v-comision-cb') ? E('v-comision-cb').value : 0) || 0;
-      E('br-prestamo').textContent  = fmt(montoNeto);
-      if(E('br-comision')) E('br-comision').textContent = fmt(comisionCB) + ' = ';
+      const montoNetoVal  = parseFloat(E('v-prestamo').value) || 0;
+      const comisionCBVal = parseFloat(E('v-comision-cb') ? E('v-comision-cb').value : 0) || 0;
+      E('br-prestamo').textContent  = fmt(montoNetoVal);
+      if(E('br-comision')) E('br-comision').textContent = fmt(comisionCBVal) + ' = ';
       E('br-revolving').textContent = fmt(saldoAnt);
       E('br-total').textContent     = fmt(total);
       const revTxt = E('br-revolving-txt');
@@ -1003,7 +1006,8 @@ run();
   set('v-apertura', p.get('apertura'));
   set('v-pago',     p.get('pago'));
   set('v-cuota',    p.get('cuota'));
-  set('v-prestamo',    p.get('prestamo'));
+  set('v-prestamo',    p.get('montoNeto') || p.get('prestamo'));
+  if (p.has('prestamo')) set('v-prestamo-cb', p.get('prestamo'));
   if (p.has('montoNeto'))  set('v-monto-neto',  p.get('montoNeto'));
   if (p.has('comisionCB')) set('v-comision-cb', p.get('comisionCB'));
 
