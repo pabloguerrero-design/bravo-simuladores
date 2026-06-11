@@ -738,7 +738,7 @@ function generarPDF() {
   doc.text(ascii('Fecha: '+today),W-M,12,{align:'right'});
   doc.text('Ref.: '+ref,W-M,20,{align:'right'});
   if(nCred) doc.text('N\u00b0 Credito: '+nCred,W-M,28,{align:'right'});
-  if(cnAnt) doc.text('CN anterior: '+cnAnt,W-M,36,{align:'right'});
+
 
   /* ── KPI BOXES ── */
   let y=HDR+10;
@@ -780,13 +780,13 @@ function generarPDF() {
   const int0_days = Math.round((primerPago - apertura)/86400000);
   const params=[
     ['N\u00b0 de credito nuevo',          nCred||'-'],
-    ['N\u00b0 de credito anterior',       cnAnt||'-'],
+    ...(cnAnt ? [['N\u00b0 de credito anterior', cnAnt]] : []),
     ['Fecha de apertura',                 fmtDateES(apertura)],
     ['Fecha primer pago',                 fmtDateES(primerPago)],
     ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
     ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
     ['Saldo Actual',                      fmtPDF(saldo)],
-    ['Cuota anterior',                    state.ant > 0 ? fmtPDF(state.ant) : '-'],
+    ...(state.ant > 0 ? [['Cuota anterior', fmtPDF(state.ant)]] : []),
     ['Nueva cuota negociada',             fmtPDF(cuota)],
     ['Nuevo saldo inicial',               fmtPDF(ns)],
     ['Plazo',                                plazo+' meses'],
