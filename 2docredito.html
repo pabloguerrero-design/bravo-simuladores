@@ -871,7 +871,7 @@ function generarPDF() {
       body: [
         ['N° de credito que se cierra',          cnA || '-'],
         ['Saldo pendiente CN anterior',               ascii(fmtPDF(sAnt))],
-        ['Saldo que se suma del nuevo credito',       ascii(fmtPDF(+(prest + com).toFixed(2)))],
+        ['Saldo que se suma del nuevo credito',       ascii(fmtPDF(prest))],
         ['Nuevo Saldo Inicial total',                 ascii(fmtPDF(saldo))],
       ],
       theme:'grid',
