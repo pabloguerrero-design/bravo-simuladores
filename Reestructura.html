@@ -217,26 +217,15 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
 
 
   <!-- KPI CARDS -->
-  <!-- FORMULA BANNER -->
-  <div class="fbanner" style="background:var(--surface);border:1px solid var(--border-2);border-left:3px solid #0075EB;border-radius:16px;padding:16px 22px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+  <!-- SALDO INICIAL BANNER -->
+  <div class="fbanner" style="background:var(--surface);border:1px solid var(--border-2);border-left:3px solid #00C896;border-radius:16px;padding:16px 22px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
     <div style="display:flex;flex-direction:column;gap:4px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8A8A8A">Primera aportación</div>
-      <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#0075EB" id="b-aport">—</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8A8A8A">Saldo Inicial</div>
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:#00C896" id="b-nsaldo">—</div>
     </div>
-    <div style="color:#333;font-size:18px">=</div>
-    <div style="display:flex;flex-direction:column;gap:4px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8A8A8A">Desglose 1er pago</div>
-      <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#0075EB" id="b-cuota-ref">—</div>
-    </div>
-    <div style="color:#333;font-size:18px">→</div>
-    <div style="display:flex;flex-direction:column;gap:4px;border-left:1px solid var(--border);padding-left:20px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8A8A8A">Saldo actual − Capital 1er pago</div>
-      <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#0075EB" id="b-formula">—</div>
-    </div>
-    <div style="margin-left:auto;display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8A8A8A">Nuevo saldo inicial</div>
-      <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#00C896" id="b-nsaldo">—</div>
-    </div>
+    <div style="display:none" id="b-aport"></div>
+    <div style="display:none" id="b-cuota-ref"></div>
+    <div style="display:none" id="b-formula"></div>
   </div>
 
   <div class="kpi-grid">
@@ -470,7 +459,7 @@ function run() {
   }
 
   const prin0   = +(cuota - int0).toFixed(2);
-  const ns = +(saldo - prin0).toFixed(2); // Nuevo saldo = saldo − capital primer pago
+  const ns = +saldo.toFixed(2); // Saldo Inicial directo
 
   // Build full table (starts from saldo, first row uses dias reales)
   const rows = buildTable(saldo, cuota, tin, apertura, primerPago);
@@ -508,7 +497,6 @@ function run() {
   E('k-int-sub').textContent= ((totalInt/ns)*100).toFixed(1)+'% del nuevo saldo';
   E('b-aport').textContent    = fmt(cuota);
   E('b-cuota-ref').innerHTML = '<span style="color:#4ADE80;font-weight:700">'+fmt(prin0)+' capital</span> + <span style="color:#FF6B35;font-weight:700">'+fmt(int0)+' int.</span>';
-  E('b-formula').textContent  = fmt(saldo)+' \u2212 '+fmt(prin0);
   E('b-nsaldo').textContent   = fmt(ns);
   E('k-nsaldo').textContent = fmt(ns);
 
