@@ -829,46 +829,12 @@ function generarPDF() {
     doc.text(k.value,kx+kW/2,y+24,{align:'center'});
   });
 
-  /* ── CONDICIONES ── */
-  y+=38;
-  doc.setFontSize(8.5); doc.setFont('helvetica','bold');
-  doc.setTextColor(45,55,90);
-  doc.text('CONDICIONES',M,y);
-  y+=3;
-  doc.setDrawColor(...C.blue); doc.setLineWidth(0.4);
-  doc.line(M,y,W-M,y);
-  y+=5;
-
+  /* ── SE CERRARÍA EL CRÉDITO ANTERIOR ── */
   const fmtDateES = d => d.toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
-  const int0_days = Math.round((primerPago - apertura)/86400000);
-  const params=[
-    ['Fecha de apertura',                 fmtDateES(apertura)],
-    ['Fecha primer pago',                 fmtDateES(primerPago)],
-    ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
-    ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
-    ['Cantidad a prestar (sin brokerage)', fmtPDF(state.montoNeto)],
-    ['Comisi\u00f3n brokerage (5% + IVA 21%)', fmtPDF(state.brokerage)],
-    ...(state.saldoAnt > 0 ? [['Cierre cr\u00e9dito anterior', fmtPDF(state.saldoAnt)]] : []),
-    ['Saldo Inicial total',               fmtPDF(state.saldo)],
-  ];
-  params.forEach(([label,value],idx)=>{
-    const rowBg = idx%2===0 ? [235,240,255] : [245,247,255];
-    doc.setFillColor(...rowBg);
-    doc.roundedRect(M,y-3.5,W-M*2,7.5,1,1,'F');
-    doc.setFontSize(8.5); doc.setFont('helvetica','normal');
-    doc.setTextColor(60,75,110);
-    doc.text(ascii(label),M+4,y+0.5);
-    doc.setFont('helvetica','bold');
-    doc.setTextColor(20,35,80);
-    doc.text(ascii(value),W-M-4,y+0.5,{align:'right'});
-    y+=8;
-  });
-
-  /* ── REVOLVING EN PDF ── */
   const { saldoAnt: sAnt, cnAnt: cnA, prestamoConCB: prest } = state;
   if (sAnt > 0) {
     y += 8;
-    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(45,55,90);
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...C.blue);
     doc.text('SE CERRARÍA EL CRÉDITO ANTERIOR', M, y);
     y += 4;
     doc.autoTable({
@@ -890,6 +856,35 @@ function generarPDF() {
     });
     y = doc.lastAutoTable.finalY + 8;
   }
+
+  /* ── CONDICIONES ── */
+  y += 8;
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...C.blue);
+  doc.text('CONDICIONES',M,y);
+  y+=4;
+
+  const int0_days = Math.round((primerPago - apertura)/86400000);
+  const params=[
+    ['Fecha de apertura',                 fmtDateES(apertura)],
+    ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
+    ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
+    ['Cantidad a prestar (sin brokerage)', fmtPDF(state.montoNeto)],
+    ['Comisión brokerage (5% + IVA 21%)', fmtPDF(state.brokerage)],
+    ...(state.saldoAnt > 0 ? [['Cierre crédito anterior', fmtPDF(state.saldoAnt)]] : []),
+    ['Saldo Inicial total',               fmtPDF(state.saldo)],
+  ];
+  params.forEach(([label,value],idx)=>{
+    const rowBg = idx%2===0 ? [235,240,255] : [245,247,255];
+    doc.setFillColor(...rowBg);
+    doc.roundedRect(M,y-3.5,W-M*2,7.5,1,1,'F');
+    doc.setFontSize(8.5); doc.setFont('helvetica','normal');
+    doc.setTextColor(60,75,110);
+    doc.text(ascii(label),M+4,y+0.5);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(20,35,80);
+    doc.text(ascii(value),W-M-4,y+0.5,{align:'right'});
+    y+=8;
+  });
 
   
 
