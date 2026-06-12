@@ -828,6 +828,7 @@ function generarPDF() {
     doc.setTextColor(...k.color);
     doc.text(k.value,kx+kW/2,y+24,{align:'center'});
   });
+  y += 48;
 
   /* ── SE CERRARÍA EL CRÉDITO ANTERIOR ── */
   const fmtDateES = d => d.toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
