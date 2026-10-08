@@ -869,8 +869,8 @@ function generarPDF() {
     ['Fecha de apertura',                 fmtDateES(apertura)],
     ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
     ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
-    ['Cantidad a prestar (sin brokerage)', fmtPDF(state.montoNeto)],
-    ['Comisión brokerage (5% + IVA 21%)', fmtPDF(state.brokerage)],
+    ['Cantidad a prestar (sin honorarios)', fmtPDF(state.montoNeto)],
+    ['Honorarios éxito 2 (5% + IVA)', fmtPDF(state.brokerage)],
     ...(state.saldoAnt > 0 ? [['Cierre crédito anterior', fmtPDF(state.saldoAnt)]] : []),
     ['Saldo Inicial total',               fmtPDF(state.saldo)],
   ];
