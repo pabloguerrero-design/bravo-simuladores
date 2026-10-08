@@ -232,7 +232,7 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
           <th>Entidad financiera</th>
           <th>Deuda D.R (€)</th>
           <th>Pago a Banco (€)</th>
-          <th>Com. Éxito + IVA (€)</th>
+          <th>Hon. Éxito 1 (15%) + IVA (€)</th>
           <th></th>
         </tr>
       </thead>
@@ -252,7 +252,7 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
         <div class="debt-sum-val" style="color:var(--blue)" id="ds-ahorro-total">—</div>
       </div>
       <div class="debt-sum-item">
-        <div class="debt-sum-lbl">Com. Éxito + IVA</div>
+        <div class="debt-sum-lbl">Hon. Éxito 1 (15%) + IVA</div>
         <div class="debt-sum-val" style="color:var(--amber)" id="ds-ce">—</div>
       </div>
       <div class="debt-sum-item">
@@ -299,7 +299,7 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
           <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)" id="dsg-pab">—</div>
         </div>
         <div style="background:var(--surface);border-radius:10px;padding:12px 14px">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Com. Éxito + IVA</div>
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Hon. Éxito 1 (15%) + IVA</div>
           <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--amber)" id="dsg-ce">—</div>
         </div>
         <div style="background:var(--surface);border-radius:10px;padding:12px 14px">
@@ -323,7 +323,7 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
           <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--t2)" id="dsg-est">—</div>
         </div>
         <div style="background:var(--surface);border-radius:10px;padding:12px 14px">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Brokerage 5% + IVA</div>
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Honorarios éxito 2 (7.85%) + IVA</div>
           <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--t2)" id="dsg-brok">—</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--green);border-radius:10px;padding:12px 14px">
@@ -717,7 +717,7 @@ function run() {
   const _dsgDif    = +(parseFloat(E('v-diferimiento').value)||0);
   const _dsgRefi   = +(parseFloat(E('v-refi').value)||0);
   const _dsgEst    = +(parseFloat(E('v-estructurado').value)||0);
-  const _dsgBrok = +((_dsgPab+_dsgCE+_dsgMen-_dsgAhorro+_dsgDif+_dsgRefi+_dsgEst)*0.05*1.21).toFixed(2);
+  const _dsgBrok = +((_dsgPab+_dsgCE+_dsgMen-_dsgAhorro+_dsgDif+_dsgRefi+_dsgEst)*0.0785*1.21).toFixed(2);
   state = { saldo, cuota, tin, ns, plazo, rows, totalInt, totalPag, totalPrin, apertura, primerPago, int0,
             dsgPab:_dsgPab, dsgCE:_dsgCE, dsgMen:_dsgMen, dsgAhorro:_dsgAhorro,
             dsgDif:_dsgDif, dsgRefi:_dsgRefi, dsgEst:_dsgEst, dsgBrok:_dsgBrok };
@@ -936,7 +936,7 @@ function getDebts() {
 
 function calcComisionExito(dr, liq) {
   if (dr <= 0 || liq <= 0 || liq > dr) return 0;
-  return +((dr - liq) * 0.20 * 1.21).toFixed(2);
+  return +((dr - liq) * 0.15 * 1.21).toFixed(2);
 }
 
 function calcDesglose() {
@@ -952,7 +952,7 @@ function calcDesglose() {
 
   // Base before brokerage (PAB + CE + mensuales - ahorro + diferimiento + refi + estructurado)
   const base = +(totalLiq + totalCE + menIVA - ahorro + dif + refi + estructurado).toFixed(2);
-  const brok = +(base * 0.05 * 1.21).toFixed(2);
+  const brok = +(base * 0.0785 * 1.21).toFixed(2);
   const total = +(base + brok).toFixed(2);
 
   const f = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+' €';
@@ -1181,13 +1181,13 @@ function generarPDF() {
     ['TIN (Tipo de interes nominal anual)',tin.toLocaleString('es-ES')+'%'],
     ['TAE (Tasa Anual Equivalente)',       ((Math.pow(1+tin/1200,12)-1)*100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+'%'],
     ...(dsgPab > 0    ? [['Pago a Banco',                    fmtPDF(dsgPab)]]    : []),
-    ...(dsgCE > 0     ? [['Com. Exito (20%) + IVA',          fmtPDF(dsgCE)]]     : []),
+    ...(dsgCE > 0     ? [['Honorarios exito 1 (15%) + IVA',          fmtPDF(dsgCE)]]     : []),
     ...(dsgMen > 0    ? [['Comisiones mensuales + IVA',      fmtPDF(dsgMen)]]    : []),
     ...(dsgAhorro > 0 ? [['(-) Ahorro cliente',              fmtPDF(dsgAhorro)]] : []),
     ...(dsgDif > 0    ? [['(+) Diferimiento',                fmtPDF(dsgDif)]]    : []),
     ...(dsgRefi > 0   ? [['(+) Refi',                        fmtPDF(dsgRefi)]]   : []),
     ...(dsgEst > 0    ? [['(+) Estructurado',                fmtPDF(dsgEst)]]    : []),
-    ...(dsgBrok > 0   ? [['Brokerage 5% + IVA',             fmtPDF(dsgBrok)]]   : []),
+    ...(dsgBrok > 0   ? [['Honorarios exito 2 (7.85%) + IVA',             fmtPDF(dsgBrok)]]   : []),
   ];
   params.forEach(([label,value],idx)=>{
     const rowBg = idx%2===0 ? [235,240,255] : [245,247,255];
